@@ -73,9 +73,8 @@ def _extract_json_array(text: str) -> list:
 def _generate_for_batch(findings: list[dict], target_country: str | None) -> list[str]:
     """Runs one Gemini call for one batch. Raises on failure — the caller decides the
     per-batch fallback, this function never fabricates a reason itself."""
+    from gemini_auth import build_client
     from google.genai.types import Content, GenerateContentConfig, Part
-
-    from bot.gemini_client import build_client
 
     prompt = _build_prompt(findings, target_country)
     client = build_client()

@@ -1,8 +1,11 @@
 """Call Gemini with a video file + the tag-analysis prompt, returning parsed JSON.
 
-Auth reuses `bot.gemini_client.build_client()` (ADC → GOOGLE_API_KEY fallback, the repo's
-one shared Gemini auth path). Only the video-specific content-building (MIME detection,
-inline-bytes vs. upload-and-poll, JSON response parsing) lives here — mirrors
+Auth reuses `gemini_auth.build_client()` — a self-contained COPY of
+`bot.gemini_client.build_client()`'s logic (ADC → GOOGLE_API_KEY fallback), kept local to this
+skill's own `scripts/` directory (not imported across a `sys.path` reach-up into the repo root)
+so this skill works standalone when distributed outside anyai-live — see `gemini_auth.py`'s
+docstring for why that reach-up broke in practice. Only the video-specific content-building
+(MIME detection, inline-bytes vs. upload-and-poll, JSON response parsing) lives here — mirrors
 `avatar-qc/scripts/analyze_video.py`'s `_call_gemini`/`_detect_mime_type`, the only other
 place in this repo that sends a video file to Gemini.
 """
@@ -11,15 +14,10 @@ from __future__ import annotations
 
 import json
 import re
-import sys
 import time
 from pathlib import Path
 
-_REPO_ROOT = Path(__file__).resolve().parents[4]
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
-
-from bot.gemini_client import build_client, is_retryable
+from gemini_auth import build_client, is_retryable
 
 _MODEL = "gemini-2.5-flash"
 _RETRY_DELAYS = [2, 4, 8, 16]

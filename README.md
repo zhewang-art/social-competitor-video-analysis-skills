@@ -34,19 +34,40 @@ Then just ask your assistant to analyze a brand's competitor videos — it will 
 
 ## Requirements
 
+**Python packages** (not vendored — install into whatever environment runs these scripts):
+
+```bash
+pip install apify-client yt-dlp openpyxl google-genai google-auth google-api-python-client
+```
+
+(`yt-dlp` is also used as a plain CLI binary via `subprocess`, not just the Python package —
+make sure the `yt-dlp` command itself is on `PATH`, e.g. `pip install -U yt-dlp` normally
+provides both.)
+
+**Credentials / access:**
+
 - `APIFY_API_KEY` — set in a local `.env` (or your environment) for `social-best-video-scraper`.
   Uses two Apify actors (`apify/instagram-scraper`, `apify/facebook-posts-scraper`); see that
-  skill's `reference/apify-actors.md` for verified field mappings and pricing.
-- `yt-dlp` installed (used for video download and as a metadata fallback source).
-- Gemini access for `social-video-tag-analyzer` — either Vertex AI ADC or a `GOOGLE_API_KEY`
-  (see `bot/gemini_client.py`-equivalent auth in your own environment; this skill pack assumes
-  a `google-genai`-compatible client is reachable the same way the rest of your setup already
-  calls Gemini).
-- Output defaults to a local `.xlsx` file (zero auth). Writing into an existing Google Sheet
-  instead needs `google-auth`/`google-api-python-client` and a Google identity with
-  `https://www.googleapis.com/auth/spreadsheets` access to that sheet — see that skill's
-  `INSTRUCTIONS.md` "Output format choice" for the one-time setup and why it never
-  auto-creates a new spreadsheet.
+  skill's `reference/apify-actors.md` for verified field mappings and pricing. This is a paid,
+  metered API — each person/team needs their own key, this pack intentionally has no shared
+  key baked in anywhere.
+- Gemini access for `social-video-tag-analyzer` — either Vertex AI ADC (`gcloud auth
+  application-default login`) or a `GOOGLE_API_KEY` environment variable. Self-contained —
+  `scripts/gemini_auth.py` handles the ADC → API-key fallback itself, no external module
+  required.
+- Output defaults to a local `.xlsx` file (zero extra auth beyond the above). Writing into an
+  existing Google Sheet instead additionally needs a Google identity with
+  `https://www.googleapis.com/auth/spreadsheets` access to that specific sheet — see that
+  skill's `INSTRUCTIONS.md` "Output format choice" for the one-time setup and why it never
+  auto-creates a new spreadsheet (creating one needs the much more sensitive `drive` scope,
+  deliberately avoided).
+
+**What this pack does NOT provide**: a hosted/managed version of any of this. Every person
+running these skills uses their own Apify key and their own Gemini auth — there is no shared
+backend service doing the scraping/analysis on anyone's behalf. If your team wants a
+zero-local-setup experience (nobody installs anything, a shared service does the work), that
+is a different kind of project — a small hosted API these skills call instead of running
+locally — not something a skill pack by itself can provide.
 
 ## What's intentionally NOT included
 

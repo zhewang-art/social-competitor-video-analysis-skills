@@ -82,10 +82,17 @@ fallback to creating a new one.
 
 ## Gemini video analysis
 
-`scripts/gemini_video_analysis.py` reuses `bot/gemini_client.build_client()` for auth (ADC →
-`GOOGLE_API_KEY` fallback — the repo's one shared Gemini auth path) and adds the
-video-specific plumbing `bot.gemini_client` doesn't cover: MIME detection, inline-bytes
-(Vertex) vs. upload-and-poll (AI Studio), and a **call-time** fallback to `GOOGLE_API_KEY`
+`scripts/gemini_video_analysis.py` uses `scripts/gemini_auth.build_client()` for auth (ADC →
+`GOOGLE_API_KEY` fallback) — a self-contained COPY of `bot/gemini_client.py`'s auth logic kept
+local to this skill (not imported across a `sys.path` reach-up into the repo root), so this
+skill works standalone when distributed outside anyai-live as a shared skill pack. An earlier
+revision imported `bot.gemini_client` directly; that broke the moment the skill was copied
+without `bot/` alongside it — caught live 2026-10-19 when a user tested the packaged skill and
+Codex correctly flagged the missing import before running anything. See `gemini_auth.py`'s
+own docstring if `bot/gemini_client.py`'s auth logic changes and the two need re-syncing.
+`gemini_video_analysis.py` adds the video-specific plumbing `gemini_auth.py` doesn't cover:
+MIME detection, inline-bytes (Vertex) vs. upload-and-poll (AI Studio), and a **call-time**
+fallback to `GOOGLE_API_KEY`
 when a Vertex AI call is rejected with a permission error even though ADC successfully built
 a Vertex client — this happened live on 2026-10-16 (ADC resolved to a real Vertex project the
 account lacks `aiplatform.endpoints.predict` on) and mirrors `avatar-qc`'s own
