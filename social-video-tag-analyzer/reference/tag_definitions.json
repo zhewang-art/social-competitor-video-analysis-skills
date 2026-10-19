@@ -1,0 +1,259 @@
+{
+  "_meta": {
+    "finalized": "2026-10-16",
+    "source": "lidia_notes/社媒达人视频分析skill调研.md Stage 4 (core 10 categories) + Stage 4b (2026-10-16 round 2 — quantitative/observational categories added after reviewing the Sofy-TH-TikTok correlation-analysis reference sheet; user explicitly excluded 画角剪辑/音声字幕/品类特有taboo categories from that reference). Do not redesign without re-reading that doc's revision history.",
+    "note": "This file is the single source of truth for BOTH the Gemini analysis prompt (scripts/build_prompt.py reads it) AND the glossary tab written into every output sheet (scripts/row_builder.py reads it). Edit here, not in two places. selection_type values: multi_open / multi_closed / single_closed / multi_closed_with_meta / multi_closed_extensible / structured_checklist / boolean / boolean_with_subtypes (Stage 4 original 7) / boolean_group / numeric_group (Stage 4b additions — a category holding several independently-scored named sub-fields, see e.g. 'content_flags' and 'quantitative_observations')."
+  },
+  "categories": [
+    {
+      "key": "cover_audience",
+      "label_cn": "覆盖人群",
+      "selection_type": "multi_open",
+      "description": "这条视频主要瞄准的目标受众画像，基于视频里出现的人物、场景、产品类型、语言语气综合判断。不是固定枚举——用具体、营销语境下常见的人群描述（如“精致妈妈”“新锐白领”），不要用“女性”“年轻人”这类过于宽泛的词。不加认知期/考虑期/转化期(funnel stage)这层——用户明确拒绝了这个维度，嫌太复杂。",
+      "example_values": ["资深中产", "精致妈妈", "新锐白领"]
+    },
+    {
+      "key": "identity",
+      "label_cn": "身份",
+      "selection_type": "multi_closed",
+      "description": "视频里“说话/出镜的人”扮演的角色定位，可多选（例如同一条视频可能同时是达人视角+测评视角）。与 POV（镜头是谁的眼睛）是两个独立维度。",
+      "values": [
+        {"value": "素人视角", "definition": "普通用户分享，非专业身份，不做系统评测", "example": "普通消费者对镜头说“我用了之后……”"},
+        {"value": "达人视角", "definition": "网红/KOL/博主身份进行内容创作和推荐", "example": "美妆博主在自己账号发布的产品种草视频"},
+        {"value": "测评视角", "definition": "系统性测试/对比多款产品，给出评分或优缺点，扮演“我来帮你评估”的角色", "example": "同时测试5款防晒霜效果的对比视频"},
+        {"value": "买家视角", "definition": "个人购买体验叙述，不做对比评测，接近个人证言——与“测评视角”的区别是不做系统比较，只是单纯的使用故事", "example": "普通买家分享“我买了这个用了一周的感受”"},
+        {"value": "商家视角", "definition": "品牌方/商家自己出镜或配音介绍产品", "example": "店主或品牌方直接出镜讲解产品卖点"},
+        {"value": "明星视角", "definition": "明星/公众人物代言或推荐", "example": "知名艺人在视频里展示使用产品"}
+      ]
+    },
+    {
+      "key": "content_ownership",
+      "label_cn": "内容归属（品牌/达人）",
+      "selection_type": "single_closed",
+      "description": "Stage 4c 新增（2026-10-18）。判断这条内容是由谁发布/制作的——品牌官方账号、KOL/达人账号，还是普通消费者的UGC。与“身份”是不同维度：“身份”判断视频里说话人扮演的角色（内容呈现层面，可多选），这里判断的是发布账号本身的性质（账号归属层面，单选）——品牌官号也可能发布“达人视角”风格的内容，KOL账号也可能发布纯商家口播风格的广告植入，两者不总是一致。主要依据画面的专业制作水准、片尾署名/水印、口吻是否像官方账号等线索综合判断，没有账号名信息时也要给出最佳判断。",
+      "values": [
+        {"value": "品牌内容", "definition": "品牌官方账号发布/制作的内容", "example": "品牌自己的IG/FB官号发布的产品介绍视频"},
+        {"value": "KOL/达人内容", "definition": "网红/博主/达人账号发布的内容，含品牌合作/广告植入", "example": "美妆博主在自己账号发布的产品种草视频"},
+        {"value": "素人UGC内容", "definition": "普通消费者账号自发分享的内容，非职业创作者、非品牌官方账号", "example": "普通用户在自己账号分享使用体验，粉丝量很小"}
+      ]
+    },
+    {
+      "key": "pov",
+      "label_cn": "POV（叙事视角）",
+      "selection_type": "single_closed",
+      "description": "摄像机镜头代表谁的眼睛在看。与“身份”是两个独立维度——同一条视频可以同时是“测评视角+第一人称运镜”。",
+      "values": [
+        {"value": "第一人称", "definition": "镜头是说话人自己的视角（手部动作、自拍视角等）", "example": "手持手机自拍录制使用产品过程"},
+        {"value": "第三人称", "definition": "旁观视角拍摄别人在使用产品", "example": "镜头从旁边拍摄一个人试用产品的过程"},
+        {"value": "无人称", "definition": "纯产品/场景特写，画面中没有人物出现", "example": "只拍摄产品本身的质地、包装特写"}
+      ]
+    },
+    {
+      "key": "hook_type",
+      "label_cn": "Hook开头类型",
+      "selection_type": "multi_closed_with_meta",
+      "description": "视频开场（通常前3秒）用的抓人技巧，可多选。每个具体标签参考性地归入 Foreplay.co 的四大元类别之一：problem-aware（痛点导向）/ aspirational（向往导向）/ social-proof（社会认同导向）/ curiosity（好奇心导向）——这层归类是本项目的best-effort映射，不是Foreplay官方对这些中文标签的分类，仅供组织参考。模式打断(pattern interrupt)已被删除，不在体系内；拆箱式已移至内容形式类别，不在此重复。",
+      "meta_categories": ["problem-aware", "aspirational", "social-proof", "curiosity"],
+      "values": [
+        {"value": "痛点开场", "meta": "problem-aware", "definition": "直接点出观众的痛点/烦恼开场（原有标签）", "example": "一上来就说“是不是总觉得皮肤很干”"},
+        {"value": "感官冲击", "meta": "curiosity", "definition": "用强烈的视觉/听觉冲击抓住注意力（原有标签）", "example": "开场是产品喷出大量泡沫的特写镜头"},
+        {"value": "直切产品", "meta": "aspirational", "definition": "开场直接展示产品，不绕弯子（原有标签）", "example": "第一帧就是产品特写加产品名"},
+        {"value": "生活分享", "meta": "aspirational", "definition": "以日常生活场景自然引入（原有标签）", "example": "从“今天想跟大家分享我的护肤习惯”这种生活化口吻开始"},
+        {"value": "结果导向", "meta": "aspirational", "definition": "开场先展示使用后的效果/结果（原有标签）", "example": "开场先展示皮肤变好后的状态"},
+        {"value": "反常识断言", "meta": "curiosity", "definition": "开场第一句话的内容违反常识的论断，制造认知冲突。包含“先引用一个流行说法再推翻”的写法（原调研里的“趋势颠覆式”已合并进此标签，不单独列）", "example": "“不是你皮肤差，是你用错了方法”／“大家都说要多喝水，其实喝多了反而……”"},
+        {"value": "提问式开场", "meta": "curiosity", "definition": "直接抛出观众正在纠结的问题", "example": "“你是不是也遇到过敏感肌爆痘的问题？”"},
+        {"value": "数据权威先行", "meta": "problem-aware", "definition": "先甩证据/数字/资质再解释是什么", "example": "“皮肤科医生都在推荐的成分，今天来说说”"},
+        {"value": "悬念式", "meta": "curiosity", "definition": "先铺垫悬念，不马上揭晓答案", "example": "说“我用了这个方法，结果让我震惊”但先不说具体结果"},
+        {"value": "社交证明开场", "meta": "social-proof", "definition": "开场直接甩“已有很多人认可”的证据", "example": "“10000人都在用的方法”／开场先放满屏好评截图"},
+        {"value": "紧迫指令式开场", "meta": "problem-aware", "definition": "开场用紧迫感/指令语气抓注意力", "example": "“别划走，这条视频能帮你省下一大笔钱”"},
+        {"value": "人群点名开场", "meta": "social-proof", "definition": "开场直接点名目标细分人群，让对的人瞬间觉得“这说的就是我”。（原名“个性化开场/personalization hook”——旧名表意不清，经用户要求改名）", "example": "“混合性皮肤的姐妹看过来”／“28岁还在长痘的看这里”"}
+      ]
+    },
+    {
+      "key": "content_format",
+      "label_cn": "内容形式",
+      "selection_type": "multi_closed",
+      "description": "视频整体的呈现形式，可多选。",
+      "values": [
+        {"value": "真人出镜", "definition": "有真人在画面中说话/演示（原有标签）", "example": ""},
+        {"value": "口播", "definition": "以说话讲解为主（原有标签）", "example": ""},
+        {"value": "配音展示", "definition": "画外音配音+画面展示，人不一定出镜（原有标签）", "example": ""},
+        {"value": "混剪", "definition": "多段素材剪辑拼接（原有标签）", "example": ""},
+        {"value": "场景", "definition": "以场景化叙事为主（原有标签）", "example": ""},
+        {"value": "产品特写", "definition": "聚焦产品本身的特写镜头（原有标签）", "example": ""},
+        {"value": "跟拍/vlog式", "definition": "跟拍日常生活的vlog形式", "example": "day-in-life跟拍记录一天使用产品的过程"},
+        {"value": "开箱", "definition": "开箱展示产品（含原调研里“拆箱式”，不在hook_type重复出现）", "example": "拆快递开箱并展示产品细节"},
+        {"value": "试用/试穿", "definition": "现场试用或试穿产品", "example": "当场试穿衣服/试用护肤品"},
+        {"value": "教程", "definition": "步骤化演示使用方法", "example": "一步步教怎么用这个产品"},
+        {"value": "情景剧/小剧场", "definition": "用短剧情演绎的方式呈现", "example": "编一个小故事场景带出产品"},
+        {"value": "分屏对比", "definition": "分屏展示对比效果或反应", "example": "左右分屏对比使用前后/两款产品"},
+        {"value": "纯字卡", "definition": "以文字卡片为主，无人声画面", "example": "纯文字配背景音乐的信息型视频"},
+        {"value": "热梗/模板翻拍", "definition": "套用当下流行的梗/模板翻拍", "example": "套用某个流行BGM/转场模板的内容"}
+      ]
+    },
+    {
+      "key": "copy_type",
+      "label_cn": "文案类型",
+      "selection_type": "multi_closed",
+      "description": "文案（口播词/字幕）整体的写作策略，可多选。",
+      "values": [
+        {"value": "痛点共鸣", "definition": "文案围绕戳中痛点展开（原有标签）", "example": ""},
+        {"value": "产品特写", "definition": "文案聚焦描述产品本身（原有标签）", "example": ""},
+        {"value": "营销号", "definition": "营销号式夸张/带节奏的文案风格（原有标签）", "example": ""},
+        {"value": "价格刺激", "definition": "用价格/折扣作为主要刺激点（原有标签）", "example": ""},
+        {"value": "结果导向", "definition": "文案聚焦强调使用结果（原有标签）", "example": ""},
+        {"value": "好奇心驱动型", "definition": "文案故意留白制造好奇心", "example": "“看到最后你会发现……”"},
+        {"value": "权威验证型", "definition": "文案引用权威/专业背书", "example": "“皮肤科医生验证有效”"},
+        {"value": "叙事转变型", "definition": "文案讲述一个从差到好的转变故事", "example": "“从满脸痘到现在素颜能见人”"},
+        {"value": "紧迫行动型", "definition": "文案催促立即行动", "example": "“今天下架，手慢无”"},
+        {"value": "个性化定制型", "definition": "文案针对细分人群定制措辞（文案层面的定制，区别于hook_type的“人群点名开场”——这是贯穿全片的措辞风格，不只是开场一句话）", "example": "通篇都用“混油皮姐妹”这种称呼贯穿文案"}
+      ]
+    },
+    {
+      "key": "story_structure",
+      "label_cn": "叙事结构（Hook-Problem-Solution-CTA）",
+      "selection_type": "structured_checklist",
+      "description": "不是从多个结构类型里选一个分类标签——用户明确否决了“PAS/AIDA/BAB/Q&A/Listicle等多选一”的设计，理由是“这类内容基本都是同一种结构，给选项没有意义”。改为对每条视频固定按 Hook → Problem → Solution → CTA 这4段模板逐条检查：每段是否存在，以及具体是怎么表现的（一两句话描述，不是空泛地说“有”）。",
+      "stages": [
+        {"key": "hook", "label_cn": "Hook（开场抓人）", "definition": "视频开场部分，对应上面的hook_type标签"},
+        {"key": "problem", "label_cn": "Problem（问题/痛点呈现）", "definition": "视频里是否明确点出一个问题/痛点/需求"},
+        {"key": "solution", "label_cn": "Solution（解决方案呈现）", "definition": "视频里是否展示产品/方法作为问题的解决方案"},
+        {"key": "cta", "label_cn": "CTA（行动号召）", "definition": "视频结尾是否有明确的行动号召（购买/点击/关注等）"}
+      ]
+    },
+    {
+      "key": "three_act_structure",
+      "label_cn": "三幕剧结构",
+      "selection_type": "boolean",
+      "description": "独立的 yes/no 判断：这条视频是否存在三幕剧结构（建立情境→冲突/转折→解决收尾），与上面的Hook-Problem-Solution-CTA检查清单是两套独立判断，不互相替代。",
+      "values": [
+        {"value": "是", "definition": "视频明显具备建立情境→冲突转折→解决收尾的三段式结构"},
+        {"value": "否", "definition": "视频不具备明显的三幕剧结构（如纯产品展示、纯清单体等）"}
+      ]
+    },
+    {
+      "key": "rtb_type",
+      "label_cn": "RTB（Reason To Believe，卖点证据类型）",
+      "selection_type": "multi_closed_extensible",
+      "description": "全片用什么证据支撑卖点主张，可多选——一条视频可能同时用多种证据类型。与hook_type里的“社交证明开场”不冲突：hook_type标“开场怎么呈现”，rtb_type标“全片用什么证据支撑卖点”。如果视频里的证据类型不在下面列表中，可以新增一个描述性标签，并在前面加“NEW:”前缀方便人工复核，不要为了凑进已有类别而强行归类。",
+      "values": [
+        {"value": "专家/权威背书", "definition": "专家、医生、权威机构的背书", "example": "皮肤科医生出镜推荐"},
+        {"value": "用户证言", "definition": "真实用户的使用反馈证言", "example": "多个素人用户分享自己的使用感受"},
+        {"value": "影响者推荐", "definition": "网红/KOL的推荐背书", "example": "美妆博主推荐"},
+        {"value": "实验/演示验证", "definition": "现场实验或演示对比验证效果", "example": "现场做对比测试，如防水测试、去污测试"},
+        {"value": "数据/第三方评测对比", "definition": "引用数据或第三方评测结果", "example": "引用检测报告数据、第三方评测榜单"},
+        {"value": "规模化社会认同", "definition": "强调大量用户已经购买/使用", "example": "“XX万人已购买”"}
+      ]
+    },
+    {
+      "key": "information_gap",
+      "label_cn": "信息缺口",
+      "selection_type": "boolean_with_subtypes",
+      "description": "心理学概念（源自Loewenstein 1994年“好奇心=信息缺口”理论）：观众“知道的”和“想知道的”之间出现缺口时会本能地想看下去填补缺口。判断这条视频的开场/叙事是否故意运用了这个机制（先不给答案），可多选子类型。常与多个hook_type同时出现，是独立于hook_type的心理机制判断。",
+      "values": [
+        {"value": "提问式缺口", "definition": "抛出问题但不立刻回答", "example": "问了问题，答案留到视频后段才揭晓"},
+        {"value": "悬念式缺口", "definition": "铺垫悬念但不马上揭晓结果", "example": "“我试了之后……”先卖关子不说结果"},
+        {"value": "反常识缺口", "definition": "抛出一个违反常识的说法，让观众想知道“为什么”", "example": "“这样做反而更伤皮肤”，让人想知道原因"}
+      ]
+    },
+    {
+      "key": "content_flags",
+      "label_cn": "内容要素检查",
+      "selection_type": "boolean_group",
+      "description": "Stage 4b 新增。一组独立判断的 yes/no 观察项，来自 Hook细节/诉求信息/CTA 三个方向——不归为单一维度的多选标签，因为每个子项都是互相独立的布尔判断，同一条视频可以任意组合命中。排除了用户明确说“不需要”的画角剪辑/音声字幕/品类特有(敏感类目)三组。",
+      "fields": [
+        {"key": "product_shown_in_first_3s", "label_cn": "开场3秒内出现产品", "definition": "视频开场前3秒画面中是否已经出现产品本身（不含包装盒外的纯场景）", "example": "第1秒就有产品特写入镜"},
+        {"key": "face_shown_in_first_3s", "label_cn": "开场3秒内出现人脸", "definition": "视频开场前3秒画面中是否已经出现清晰人脸", "example": "开场即对镜头说话的人物特写"},
+        {"key": "text_overlay_hook_present", "label_cn": "开场有文字悬念/标题党字幕", "definition": "开场是否用屏幕文字叠加制造悬念/抓人标题（独立于口播内容，专指字幕/贴纸文字本身）", "example": "开场叠加大字“看完你会后悔没早点知道”"},
+        {"key": "price_mentioned", "label_cn": "提及价格", "definition": "视频中是否明确提到具体价格/折扣数字（口播或字幕均算）", "example": "“现在只要199”"},
+        {"key": "price_comparison_present", "label_cn": "出现价格对比", "definition": "是否将本产品价格与其他产品/原价进行对比", "example": "“专柜要卖500，这个只要199”"},
+        {"key": "competitor_or_other_channel_mention", "label_cn": "提及竞品或其他渠道", "definition": "是否提到竞品品牌名，或提到“其他平台/其他渠道”作为对比", "example": "“比XX牌子好用多了”"},
+        {"key": "continuous_use_claim", "label_cn": "声称持续使用", "definition": "是否包含“长期使用/用了很久/回购”这类强调持续使用关系的表述，区别于“第一次试用”", "example": "“我已经回购第三瓶了”"},
+        {"key": "engagement_hook_beyond_cta", "label_cn": "CTA之外的互动引导", "definition": "是否在购买类CTA之外，额外引导观众评论/关注/转发/参与互动（与cta_type的购买行动号召是独立维度）", "example": "“评论区扣1告诉我你最想要哪个颜色”"}
+      ]
+    },
+    {
+      "key": "quantitative_observations",
+      "label_cn": "量化观察",
+      "selection_type": "numeric_group",
+      "description": "Stage 4b 新增。一组需要人工/Gemini逐帧估计的数值型观察项，来自 人物出演/商品露出/诉求信息 三个方向。每个子项独立给出一个数字，没有把握精确到秒/百分比时允许给出最佳估计并在该子项后加(约)标注,而不是留空——这些数字之后会被下游做分桶统计,不需要绝对精确,但需要尽力给出,不要用'无法判断'逃避。",
+      "fields": [
+        {"key": "talent_count", "label_cn": "出镜人数", "unit": "人", "definition": "视频中有台词或明显表演行为的出镜人数（背景路人不计入）", "example": "一个博主+一个朋友对话=2"},
+        {"key": "product_first_appearance_sec", "label_cn": "产品首次出现时间", "unit": "秒", "definition": "从视频开始到产品本身（不含包装盒）第一次完整入镜的时间点", "example": "开场即出现=0，第5秒才出现产品=5"},
+        {"key": "product_screen_time_pct", "label_cn": "产品画面占比", "unit": "%", "definition": "产品本身（含手持/特写/使用中）出现在画面里的总时长，占视频总时长的百分比估算", "example": "全程多半时间都在拍产品特写=约70"},
+        {"key": "product_close_up_count", "label_cn": "产品特写镜头次数", "unit": "次", "definition": "视频中单独给产品本身的特写镜头切换次数（同一镜头内的运镜不重复计数）", "example": "开场一个特写+结尾一个特写=2"},
+        {"key": "product_count", "label_cn": "出现产品数量", "unit": "个", "definition": "视频中出现的该品牌/竞品产品品类数量（同一产品的不同颜色/规格算1个，除非视频明确对比多款才分别计数）", "example": "展示了一套三件套护肤品=3"},
+        {"key": "price_switch_count", "label_cn": "价格信息切换次数", "unit": "次", "definition": "视频中出现的不同价格/折扣信息的个数（如“原价+折后价”算2，只提一次价格算1，未提及价格=0）", "example": "“原价399，今天直播间只要199”=2"}
+      ]
+    },
+    {
+      "key": "talent_gender",
+      "label_cn": "出镜人物性别",
+      "selection_type": "multi_closed",
+      "description": "Stage 4b 新增。视频中出镜人物的性别构成，可多选（如同时出现男女两人）。与出镜人数(talent_count)是独立维度。",
+      "values": [
+        {"value": "女性", "definition": "出镜人物中有女性", "example": ""},
+        {"value": "男性", "definition": "出镜人物中有男性", "example": ""},
+        {"value": "无人物出镜", "definition": "全片无真人出镜（纯产品/场景/字卡）", "example": ""}
+      ]
+    },
+    {
+      "key": "talent_age_appearance",
+      "label_cn": "出镜人物年龄观感",
+      "selection_type": "multi_closed",
+      "description": "Stage 4b 新增。基于画面观感估计的年龄段，不是真实年龄——可多选（多人出镜且年龄段不同时）。",
+      "values": [
+        {"value": "青少年", "definition": "观感约10多岁", "example": ""},
+        {"value": "青年", "definition": "观感约20-35岁", "example": ""},
+        {"value": "中年", "definition": "观感约36-55岁", "example": ""},
+        {"value": "中老年", "definition": "观感55岁以上", "example": ""},
+        {"value": "无人物出镜", "definition": "全片无真人出镜，无法判断", "example": ""}
+      ]
+    },
+    {
+      "key": "talent_expertise_signal",
+      "label_cn": "出镜人物专业度信号",
+      "selection_type": "multi_closed",
+      "description": "Stage 4b 新增。视频是否传递出镜人物具备某种专业/权威身份的信号，可多选。与标签体系里的“身份”(identity，达人/素人/测评等角色定位)是不同维度——这里专指“画面/口播有没有主动强调专业资质”这个信号本身。",
+      "values": [
+        {"value": "白大褂/医生形象", "definition": "身穿白大褂或自称医生/护士等医疗身份", "example": ""},
+        {"value": "职业制服/工作场景", "definition": "身穿明显职业相关制服，或处于专业工作场景（如实验室、美容院）", "example": ""},
+        {"value": "资质/证书展示", "definition": "画面中展示证书、检测报告、资质文件", "example": ""},
+        {"value": "无专业度信号", "definition": "没有任何专业身份暗示，纯素人形象", "example": ""}
+      ]
+    },
+    {
+      "key": "cta_type",
+      "label_cn": "CTA类型",
+      "selection_type": "multi_closed",
+      "description": "Stage 4b 新增。视频结尾/全片行动号召具体要求观众做什么，可多选。与structured_checklist里story_structure.cta（判断“是否存在CTA”及其具体表现描述）互补——这里是CTA的分类标签，那边是自由文本描述。",
+      "values": [
+        {"value": "引导购买/下单", "definition": "直接要求购买/下单/点击购物车", "example": "“点击小黄车下单”"},
+        {"value": "引导点击链接/主页", "definition": "引导去评论区链接或主页了解更多", "example": "“链接在主页”"},
+        {"value": "引导关注账号", "definition": "要求关注账号", "example": "“记得关注我”"},
+        {"value": "引导评论/互动", "definition": "要求评论/扣字/参与话题", "example": "“评论区告诉我”"},
+        {"value": "引导转发/分享", "definition": "要求转发给朋友/分享", "example": "“转发给需要的姐妹”"},
+        {"value": "引导线下到店/咨询", "definition": "要求到店或私信咨询", "example": "“私信我了解详情”"},
+        {"value": "无明确CTA", "definition": "全片没有任何行动号召", "example": ""}
+      ]
+    },
+    {
+      "key": "job_dimension",
+      "label_cn": "JTBD任务维度",
+      "selection_type": "multi_closed",
+      "description": "Stage 4b 新增。借用Jobs-to-be-Done理论的三个经典维度，判断视频主打说服观众购买的理由落在哪个维度，可多选但通常以1个为主导。",
+      "values": [
+        {"value": "功能性任务", "definition": "强调产品解决的实际功能性问题（有效/好用/解决了什么具体问题）", "example": "“祛痘效果立竿见影”"},
+        {"value": "情感性任务", "definition": "强调产品带来的情绪/心理满足感", "example": "“用了之后感觉更自信了”"},
+        {"value": "社会性任务", "definition": "强调产品带来的社交身份/他人评价", "example": "“闺蜜都问我用了什么”"}
+      ]
+    },
+    {
+      "key": "cep_occasion_type",
+      "label_cn": "CEP场景切入点",
+      "selection_type": "multi_open",
+      "description": "Stage 4b 新增。借用Category Entry Points理论：视频把产品和什么样的具体使用场景/人生时刻绑定在一起，作为切入消费者记忆的入口。不是固定枚举——用具体的场景描述（如“熬夜加班后”“换季敏感期”“出游前”），不要用“日常”这种过于宽泛的词；视频中若未体现具体场景切入点可留空数组。",
+      "example_values": ["换季敏感期", "熬夜加班后", "出游前", "开学季"]
+    }
+  ]
+}
